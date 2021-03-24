@@ -22,6 +22,7 @@ import io.github.bucket4j.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(path = {"/v2/burgers"}, produces = APPLICATION_JSON_VALUE)
 public class BurgerController {
     private final BurgerService burgerService;
@@ -39,13 +40,11 @@ public class BurgerController {
                 .build();
     }
 
-
     @Operation(summary = "Add a new burger", description = "", tags = { "burger" })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Burger created",
                     content = @Content(schema = @Schema(implementation = Burgers.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input")})
-    @CrossOrigin(origins = "*")
     @PostMapping(consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Burgers> createBurger(@Valid @RequestBody BurgerIncomingDto burgerIncomingDto) {
         if (this.bucket.tryConsume(1)) {
@@ -58,7 +57,6 @@ public class BurgerController {
 
     @Operation(summary = "Returns a list of burgers filtered based on the query parameters")
     @ApiResponse(responseCode = "200", description = "List of burgers", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BurgerDto.class))})
-    @CrossOrigin(origins = "*")
     @GetMapping
     public ResponseEntity<List<Burgers>> getBurgers(
             @RequestParam(required = false, name = "page", defaultValue = "0") int page,
@@ -84,10 +82,8 @@ public class BurgerController {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
     }
 
-
     @Operation(summary = "Returns burgers model by id")
     @ApiResponse(responseCode = "200", description = "Burger model", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BurgerDto.class))})
-    @CrossOrigin(origins = "*")
     @GetMapping(value = "/{id}")
     public ResponseEntity<Optional<Burgers>> getBurgersById(@PathVariable Long id) {
         if (this.bucket.tryConsume(1)) {
@@ -100,7 +96,6 @@ public class BurgerController {
 
     @Operation(summary = "Returns burgers model by random id")
     @ApiResponse(responseCode = "200", description = "Burger model by random id", content = {@Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = BurgerDto.class))})
-    @CrossOrigin(origins = "*")
     @GetMapping(value = "/random")
     public ResponseEntity<Optional<Burgers>> getBurgersByRandomId() {
         if (this.bucket.tryConsume(1)) {
