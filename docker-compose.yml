@@ -1,0 +1,39 @@
+version: '3'
+services:
+  burger-mysql:
+    restart: always
+    container_name: burger-mysql
+    image: mysql
+    environment:
+      MYSQL_DATABASE: burger
+      MYSQL_ROOT_PASSWORD: burgerpass
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+    ports:
+      - "6303:3306"
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=burgerpass--execute \"SHOW DATABASES;\""
+      interval: 2s
+      timeout: 20s
+      retries: 10
+
+  burger-api:
+    restart: on-failure
+    container_name: burger-api
+    build: ./
+    expose:
+      - "5060"
+    ports:
+      - 5060:5060
+    environment:
+      MYSQL_PORT: 3306
+      MYSQL_DB: burger
+      SERVER_PORT: 5060
+      MYSQL_USER: root
+      MYSQL_PASSWORD: burgerpass
+      MYSQL_DOCKER_NAME: burger-mysql
+    depends_on:
+      - burger-mysql
+    links:
+      - burger-mysql
